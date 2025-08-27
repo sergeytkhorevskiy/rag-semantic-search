@@ -1,0 +1,31 @@
+fastapi==0.112.0
+uvicorn==0.30.3
+pydantic==2.8.2
+python-dotenv==1.0.1
+
+# Retrieval
+faiss-cpu==1.8.0.post1
+sentence-transformers==3.0.1
+numpy==1.26.4
+
+# Parsing
+pypdf==4.3.1
+beautifulsoup4==4.12.3
+lxml==5.2.2
+html2text==2024.2.26
+
+# UI & utils
+gradio==4.44.1
+tqdm==4.66.4
+
+# LLM 
+openai>=1.0.0
+requests==2.32.3
+
+# Async operations (compatible with gradio)
+aiofiles>=22.0,<24.0
+
+einops
+
+# for ingest_parallel.py
+cryptography==45.0.6

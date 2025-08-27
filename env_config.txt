@@ -1,0 +1,20 @@
+# Environment Variables Configuration
+# Copy this to a .env file in the project root
+
+# OpenAI API Configuration (REQUIRED)
+OPENAI_API_KEY=your_openai_api_key_here
+LLM_MODEL=gpt-4o-mini
+
+# Embedding Model
+EMBED_MODEL=intfloat/multilingual-e5-base
+
+# Index and Chunks Paths
+INDEX_PATH=./index/faiss.index
+CHUNKS_PATH=./index/chunks.jsonl
+
+# Re-ranking (optional)
+RE_RANK=false
+
+# Recreate documents cache on server load
+RECREATE_CACHE=true
+

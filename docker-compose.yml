@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  rag-server:
+    build: .
+    container_name: rag-semantic-search
+    ports:
+      - "8000:8000"  # API server
+    volumes:
+      - ./data:/app/data
+      - ./index:/app/index
+      - ./.env:/app/.env:ro
+    environment:
+      - EMBED_MODEL=intfloat/multilingual-e5-base
+      - INDEX_PATH=./index/faiss.index
+      - CHUNKS_PATH=./index/chunks.jsonl
+      - RE_RANK=false
+      - USE_MMR=false
+      - SEARCH_MODE=hybrid
+      - HYBRID_ALPHA=0.65
+      - FETCH_K=64
+      - LEXICAL_FALLBACK=true
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Gradio UI service
+  rag-ui:
+    build: .
+    container_name: rag-gradio-ui
+    ports:
+      - "7860:7860"  # Gradio UI
+    volumes:
+      - ./data:/app/data
+      - ./index:/app/index
+      - ./.env:/app/.env:ro
+    environment:
+      - API=http://rag-server:8000
+    command: ["python", "ui/gradio_app.py"]
+    depends_on:
+      rag-server:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7860/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
