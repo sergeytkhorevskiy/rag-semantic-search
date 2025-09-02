@@ -180,3 +180,4 @@ def ingest():
 if __name__ == "__main__":
     print(f"🚀 Starting async ingestion with {N_WORKERS} workers")
     ingest()
+

@@ -74,12 +74,17 @@ def do_ask(q, k, mode, alpha, lexical_fallback, use_client_rerank=False, mmr=Fal
     hits = j.get("hits", [])
     if use_client_rerank and mode != "bm25":
         hits = _client_rerank(q, hits, k)
-    md = "### Answer\n" + ans + "\n\n---\n### Sources with highlighted context\n"
+    
+    # Return answer and sources separately
+    answer_md = "### Answer\n" + ans
+    
+    sources_md = "### Sources with highlighted context\n"
     for i, h in enumerate(hits, 1):
         snippet = _highlight_snippet(h.get("text",""), q, max_chars=600)
         extra = f" (client_rerank={h.get('client_rerank_score', 0.0):.3f})" if 'client_rerank_score' in h else ""
-        md += f"**[{i}] {h.get('doc_path','')}** — `{h.get('chunk_id','')}`{extra} (mode={h.get('mode','')})  \n> {snippet}\n\n"
-    return md
+        sources_md += f"**[{i}] {h.get('doc_path','')}** — `{h.get('chunk_id','')}`{extra} (mode={h.get('mode','')})  \n> {snippet}\n\n"
+    
+    return answer_md, sources_md
 
 with gr.Blocks() as demo:
     gr.Markdown("# 🔎 RAG Semantic Search")
@@ -98,8 +103,15 @@ with gr.Blocks() as demo:
     with gr.Tab("Ask (RAG)"):
         use_rr2 = gr.Checkbox(label="Client-side re-rank for sources (experimental)", value=False)
         use_mmr2 = gr.Checkbox(label="Use MMR (diversity) on server", value=False)
-        out2 = gr.Markdown()
-        gr.Button("Ask").click(do_ask, [q, k, mode, alpha, lexical_fallback, use_rr2, use_mmr2], out2)
+        
+        # Answer output
+        answer_out = gr.Markdown(label="Answer")
+        
+        # Collapsible sources section
+        with gr.Accordion("📚 Sources with highlighted context", open=False):
+            sources_out = gr.Markdown(label="Sources")
+        
+        gr.Button("Ask").click(do_ask, [q, k, mode, alpha, lexical_fallback, use_rr2, use_mmr2], [answer_out, sources_out])
 
 if __name__ == "__main__":
     demo.launch(server_name="0.0.0.0", server_port=7860)
